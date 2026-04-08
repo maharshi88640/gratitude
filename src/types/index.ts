@@ -1,0 +1,195 @@
+export interface GratitudePost {
+  id: string;
+  content: string;
+  category: PostCategory;
+  timestamp: Date;
+  likes: number;
+  isLiked: boolean;
+  color: string;
+  author?: string;
+  authorId?: string;
+  isAnonymous: boolean;
+  isPrivate: boolean;
+  location?: string;
+  moodTags: MoodTag[];
+  reactions: Reaction[];
+  replies: Reply[];
+  imageUrl?: string;
+}
+
+export interface Reply {
+  id: string;
+  content: string;
+  timestamp: Date;
+  isAnonymous: boolean;
+  author?: string;
+  authorId?: string;
+}
+
+export interface Reaction {
+  id: string;
+  type: ReactionType;
+  userId: string;
+  timestamp: Date;
+}
+
+export interface User {
+  id: string;
+  username: string;
+  displayName: string;
+  email: string;
+  avatar?: string;
+  bio?: string;
+  location?: string;
+  joinDate: Date;
+  isVerified: boolean;
+  stats: UserPublicStats;
+  preferences: UserPreferences;
+}
+
+export interface UserPublicStats {
+  totalPosts: number;
+  totalLikes: number;
+  currentStreak: number;
+  longestStreak: number;
+  followersCount: number;
+  followingCount: number;
+  gratitudeScore: number;
+}
+
+export interface UserPreferences {
+  allowFollowers: boolean;
+  showEmail: boolean;
+  showLocation: boolean;
+  allowDirectMessages: boolean;
+  notifyOnFollow: boolean;
+  notifyOnLike: boolean;
+  notifyOnComment: boolean;
+}
+
+export interface Friendship {
+  id: string;
+  followerId: string;
+  followingId: string;
+  status: FriendshipStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface FriendRequest {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  message?: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: Date;
+}
+
+export interface DirectMessage {
+  id: string;
+  fromUserId: string;
+  toUserId: string;
+  content: string;
+  timestamp: Date;
+  isRead: boolean;
+  type: 'text' | 'gratitude_share';
+  attachedPostId?: string;
+}
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  isRead: boolean;
+  timestamp: Date;
+  actionUrl?: string;
+  fromUserId?: string;
+  postId?: string;
+}
+
+export type FriendshipStatus = 'following' | 'friends' | 'blocked';
+
+export type NotificationType = 
+  | 'new_follower'
+  | 'friend_request'
+  | 'post_liked'
+  | 'post_commented'
+  | 'friend_posted'
+  | 'milestone_reached'
+  | 'direct_message';
+
+export type ReactionType = 'heart' | 'hug' | 'fire' | 'sunshine' | 'clap' | 'sparkle';
+
+export type MoodTag = 'hopeful' | 'thankful' | 'overcoming' | 'peaceful' | 'excited' | 'content' | 'inspired' | 'blessed';
+
+export type PostCategory = 
+  | 'family'
+  | 'health'
+  | 'career'
+  | 'nature'
+  | 'friendship'
+  | 'achievement'
+  | 'mindfulness'
+  | 'love'
+  | 'food'
+  | 'relationships'
+  | 'general';
+
+export interface CategoryConfig {
+  name: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+}
+
+export interface UserStats {
+  currentStreak: number;
+  longestStreak: number;
+  totalPosts: number;
+  lastPostDate?: Date;
+  weeklyStats: WeeklyStats;
+  mostUsedWords: WordFrequency[];
+  mostGratefulFor: CategoryFrequency[];
+}
+
+export interface WeeklyStats {
+  postsThisWeek: number;
+  averageMood: number;
+  topCategories: CategoryFrequency[];
+  moodTrend: MoodTrendPoint[];
+}
+
+export interface WordFrequency {
+  word: string;
+  count: number;
+}
+
+export interface CategoryFrequency {
+  category: string;
+  count: number;
+  percentage: number;
+}
+
+export interface MoodTrendPoint {
+  date: string;
+  mood: number;
+  posts: number;
+}
+
+export interface DailyPrompt {
+  id: string;
+  date: string;
+  prompt: string;
+  category: PostCategory;
+}
+
+export interface ReflectionSession {
+  id: string;
+  date: Date;
+  duration: number;
+  content: string;
+  mood: number;
+  breathingMinutes: number;
+}
