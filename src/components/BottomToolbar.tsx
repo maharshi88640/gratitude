@@ -1,8 +1,7 @@
 import React from 'react';
-import { Brain, BarChart3, Book, AlertTriangle, Plus } from 'lucide-react';
+import { BarChart3, Book, AlertTriangle, Plus } from 'lucide-react';
 
 interface BottomToolbarProps {
-  onReflectionClick: () => void;
   onReportClick: () => void;
   onJournalClick: () => void;
   onCrisisClick: () => void;
@@ -10,7 +9,6 @@ interface BottomToolbarProps {
 }
 
 const BottomToolbar: React.FC<BottomToolbarProps> = ({
-  onReflectionClick,
   onReportClick,
   onJournalClick,
   onCrisisClick,
@@ -31,15 +29,7 @@ const BottomToolbar: React.FC<BottomToolbarProps> = ({
             <span className="text-xs font-medium hidden sm:block">New Post</span>
           </button>
 
-          {/* Reflection Mode */}
-          <button
-            onClick={onReflectionClick}
-            className="flex flex-col items-center space-y-1 p-2 text-gray-700 hover:text-purple-600 transition-colors group"
-          >
-            <Brain className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
-            <span className="text-xs font-medium hidden sm:block">Reflect</span>
-          </button>
-
+          
           {/* Journal */}
           <button
             onClick={onJournalClick}

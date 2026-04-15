@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, MapPin, Calendar, Heart, Users, Flame, Trophy, MessageCircle, UserPlus, UserMinus, Settings, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, Heart, Users, Flame, Trophy, MessageCircle, UserPlus, UserMinus, Settings, Shield, Trash2 } from 'lucide-react';
 import { User, GratitudePost } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -11,7 +11,11 @@ interface ProfileScreenProps {
   onFollow: (userId: string) => void;
   onUnfollow: (userId: string) => void;
   onSendMessage: (userId: string) => void;
+  onViewPost: (postId: string) => void;
   onBack: () => void;
+  onEditProfile: () => void;
+  onViewFollowers: (userId: string) => void;
+  onDelete?: (postId: string) => void;
 }
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({
@@ -22,7 +26,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
   onFollow,
   onUnfollow,
   onSendMessage,
-  onBack
+  onViewPost,
+  onBack,
+  onEditProfile,
+  onViewFollowers,
+  onDelete
 }) => {
   const [activeTab, setActiveTab] = useState<'posts' | 'stats'>('posts');
   const isOwnProfile = user.id === currentUserId;
@@ -46,13 +54,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
               <p className="text-sm text-gray-600">@{user.username}</p>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-              <Shield className="w-4 h-4" />
-              <span>Anonymous</span>
-            </div>
-          </div>
+          {isOwnProfile && (
+            <button
+              onClick={onEditProfile}
+              className="p-2 text-gray-600 hover:text-purple-600 rounded-full hover:bg-purple-50 transition-colors"
+            >
+              <Settings className="w-6 h-6" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -92,13 +101,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
               {/* Stats Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-                <div className="text-center bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6">
+                <button
+                  onClick={() => onViewFollowers(user.id)}
+                  className="text-center bg-gradient-to-r from-purple-100 to-purple-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6 hover:from-purple-200 hover:to-purple-300 transition-colors cursor-pointer"
+                >
                   <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-500 rounded-full mb-2 sm:mb-3 lg:mb-4 mx-auto">
                     <Users className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
                   </div>
                   <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-700">{user.stats.followersCount}</p>
                   <p className="text-xs sm:text-sm text-purple-600 font-medium">Followers</p>
-                </div>
+                </button>
                 <div className="text-center bg-gradient-to-r from-pink-100 to-pink-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6">
                   <div className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-pink-500 rounded-full mb-2 sm:mb-3 lg:mb-4 mx-auto">
                     <Heart className="w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 text-white" />
@@ -201,19 +213,37 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
                   {userPosts.map((post) => (
-                    <div key={post.id} className={`bg-gradient-to-br ${post.color} rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1`}>
-                      <p className="text-gray-800 leading-relaxed mb-4 text-lg">{post.content}</p>
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>{formatDistanceToNow(post.timestamp, { addSuffix: true })}</span>
-                        <div className="flex items-center space-x-4">
-                          <span className="flex items-center space-x-1">
-                            <Heart className="w-4 h-4" />
-                            <span>{post.likes}</span>
-                          </span>
-                          <span className="flex items-center space-x-1">
-                            <MessageCircle className="w-4 h-4" />
-                            <span>{post.replies.length}</span>
-                          </span>
+                    <div 
+                      key={post.id} 
+                      className={`bg-gradient-to-br ${post.color} rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 relative`}
+                    >
+                      {isOwnProfile && onDelete && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (window.confirm('Are you sure you want to delete this post?')) {
+                              onDelete(post.id);
+                            }
+                          }}
+                          className="absolute top-4 right-4 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200 shadow-md"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                      <div onClick={() => onViewPost(post.id)} className="cursor-pointer">
+                        <p className="text-gray-800 leading-relaxed mb-4 text-lg">{post.content}</p>
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>{formatDistanceToNow(post.timestamp, { addSuffix: true })}</span>
+                          <div className="flex items-center space-x-4">
+                            <span className="flex items-center space-x-1">
+                              <Heart className="w-4 h-4" />
+                              <span>{post.likes}</span>
+                            </span>
+                            <span className="flex items-center space-x-1">
+                              <MessageCircle className="w-4 h-4" />
+                              <span>{post.replies.length}</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>

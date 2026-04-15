@@ -14,24 +14,19 @@ const WeeklyReport: React.FC<WeeklyReportProps> = ({ stats, isOpen, onClose }) =
 
   // Advanced analytics functions
   const analyzeMoodTrends = () => {
-    // Simulate mood trend data based on engagement patterns
-    return [
-      { day: 'Mon', mood: 7, engagement: 3 },
-      { day: 'Tue', mood: 8, engagement: 5 },
-      { day: 'Wed', mood: 6, engagement: 2 },
-      { day: 'Thu', mood: 9, engagement: 6 },
-      { day: 'Fri', mood: 8, engagement: 4 },
-      { day: 'Sat', mood: 7, engagement: 3 },
-      { day: 'Sun', mood: 8, engagement: 5 }
-    ];
+    const moodTrend = stats.weeklyStats?.moodTrend || [];
+    return moodTrend.map(point => ({
+      day: new Date(point.date).toLocaleDateString('en-US', { weekday: 'short' }),
+      mood: point.mood || 7,
+      engagement: point.posts || 0
+    }));
   };
 
   const analyzeSentimentPatterns = () => {
-    // Simulate sentiment analysis based on word patterns
-    return [
-      { sentiment: 'Positive', value: 65, color: '#10B981' },
-      { sentiment: 'Neutral', value: 25, color: '#F59E0B' },
-      { sentiment: 'Reflective', value: 10, color: '#3B82F6' }
+    return stats.weeklyStats?.sentimentPatterns || [
+      { sentiment: 'Positive', value: 0, color: '#10B981' },
+      { sentiment: 'Neutral', value: 0, color: '#F59E0B' },
+      { sentiment: 'Reflective', value: 0, color: '#3B82F6' }
     ];
   };
 
@@ -47,9 +42,12 @@ const WeeklyReport: React.FC<WeeklyReportProps> = ({ stats, isOpen, onClose }) =
   const analyzeMentalHealthScore = () => {
     // Calculate mental health score based on multiple factors
     const streakScore = Math.min(stats.currentStreak * 10, 30);
-    const engagementScore = Math.min(stats.weeklyStats.postsThisWeek * 5, 30);
+    const engagementScore = Math.min((stats.weeklyStats?.postsThisWeek || 0) * 5, 30);
     const consistencyScore = stats.currentStreak > 3 ? 20 : 10;
-    const totalScore = streakScore + engagementScore + consistencyScore + 20; // Base score
+    const moodScore = Math.min((stats.weeklyStats?.averageMood || 7) * 2, 20);
+    const contentScore = Math.min((stats.contentSentiment?.ownPostsSentiment || 0.5) * 20, 20);
+    const socialScore = stats.contentSentiment?.socialEngagementScore || 0;
+    const totalScore = streakScore + engagementScore + consistencyScore + moodScore + contentScore + socialScore;
     
     return {
       score: Math.min(totalScore, 100),
@@ -61,6 +59,9 @@ const WeeklyReport: React.FC<WeeklyReportProps> = ({ stats, isOpen, onClose }) =
   const generatePersonalizedInsights = () => {
     const insights = [];
     const mentalHealth = analyzeMentalHealthScore();
+    const avgMood = stats.weeklyStats?.averageMood || 7;
+    const ownSentiment = stats.contentSentiment?.ownPostsSentiment || 0.5;
+    const engagedSentiment = stats.contentSentiment?.engagedPostsSentiment || 0.5;
     
     if (stats.currentStreak >= 7) {
       insights.push({
@@ -86,6 +87,47 @@ const WeeklyReport: React.FC<WeeklyReportProps> = ({ stats, isOpen, onClose }) =
         icon: '📚',
         title: 'Expanding Awareness',
         description: 'Your diverse gratitude vocabulary shows growing emotional intelligence.'
+      });
+    }
+    
+    if (avgMood >= 9) {
+      insights.push({
+        type: 'wellness',
+        icon: '✨',
+        title: 'Elevated Mood',
+        description: 'Your recent posts indicate consistently high positive mood levels.'
+      });
+    } else if (avgMood <= 6) {
+      insights.push({
+        type: 'reflection',
+        icon: '🤔',
+        title: 'Time for Reflection',
+        description: 'Consider exploring deeper gratitude practices to boost your mood.'
+      });
+    }
+    
+    if (ownSentiment > 0.7) {
+      insights.push({
+        type: 'content',
+        icon: '💬',
+        title: 'Positive Expression',
+        description: 'Your posts show strong positive sentiment - keep sharing uplifting content!'
+      });
+    } else if (ownSentiment < 0.4) {
+      insights.push({
+        type: 'content',
+        icon: '🧘',
+        title: 'Reflective Writing',
+        description: 'Your writing reflects deeper contemplation. Consider balancing with more positive affirmations.'
+      });
+    }
+    
+    if (engagedSentiment > 0.7) {
+      insights.push({
+        type: 'social',
+        icon: '🤝',
+        title: 'Positive Social Circle',
+        description: 'You engage with highly positive content from others - great for mental health!'
       });
     }
     
@@ -213,25 +255,14 @@ const WeeklyReport: React.FC<WeeklyReportProps> = ({ stats, isOpen, onClose }) =
                 <Brain className="w-5 h-5 sm:w-6 sm:h-6 text-blue-500" />
                 <span>Sentiment Analysis</span>
               </h4>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={sentimentPatterns}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ sentiment, value }) => `${sentiment} ${value}%`}
-                    outerRadius={70}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {sentimentPatterns.map((sentiment, index) => (
-                      <Cell key={`cell-${index}`} fill={sentiment.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="space-y-2">
+                {sentimentPatterns.map((pattern, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span className="text-sm text-gray-700">{pattern.sentiment}</span>
+                    <span className="font-semibold text-sm">{pattern.value}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Time-Based Patterns */}

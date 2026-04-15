@@ -4,9 +4,10 @@ import { Heart, Sparkles } from 'lucide-react';
 interface EmptyStateProps {
   searchTerm?: string;
   onAddPost: () => void;
+  showMyPostsOnly?: boolean;
 }
 
-const EmptyState: React.FC<EmptyStateProps> = ({ searchTerm, onAddPost }) => {
+const EmptyState: React.FC<EmptyStateProps> = ({ searchTerm, onAddPost, showMyPostsOnly }) => {
   return (
     <div className="text-center py-16">
       <div className="max-w-md mx-auto">

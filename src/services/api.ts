@@ -1,4 +1,11 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+const envApiUrl = import.meta.env.VITE_API_URL as string | undefined;
+const fallbackApiUrl = typeof window !== 'undefined'
+  ? `${window.location.protocol}//${window.location.hostname}:5001/api`
+  : 'http://localhost:5001/api';
+
+const API_BASE_URL = envApiUrl && envApiUrl.includes('localhost') && typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  ? fallbackApiUrl
+  : envApiUrl || fallbackApiUrl;
 
 interface RequestOptions {
   method?: string;

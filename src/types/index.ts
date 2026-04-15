@@ -43,6 +43,7 @@ export interface User {
   location?: string;
   joinDate: Date;
   isVerified: boolean;
+  isFollowing?: boolean;
   stats: UserPublicStats;
   preferences: UserPreferences;
 }
@@ -152,6 +153,7 @@ export interface UserStats {
   weeklyStats: WeeklyStats;
   mostUsedWords: WordFrequency[];
   mostGratefulFor: CategoryFrequency[];
+  contentSentiment: ContentSentiment;
 }
 
 export interface WeeklyStats {
@@ -159,6 +161,7 @@ export interface WeeklyStats {
   averageMood: number;
   topCategories: CategoryFrequency[];
   moodTrend: MoodTrendPoint[];
+  sentimentPatterns: SentimentPattern[];
 }
 
 export interface WordFrequency {
@@ -178,18 +181,21 @@ export interface MoodTrendPoint {
   posts: number;
 }
 
+export interface SentimentPattern {
+  sentiment: string;
+  value: number;
+  color: string;
+}
+
+export interface ContentSentiment {
+  ownPostsSentiment: number; // 0-1 scale
+  engagedPostsSentiment: number; // 0-1 scale
+  socialEngagementScore: number; // 0-20 based on positive engagement
+}
+
 export interface DailyPrompt {
   id: string;
   date: string;
   prompt: string;
   category: PostCategory;
-}
-
-export interface ReflectionSession {
-  id: string;
-  date: Date;
-  duration: number;
-  content: string;
-  mood: number;
-  breathingMinutes: number;
 }

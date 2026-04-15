@@ -26,8 +26,19 @@ app.use(helmet({
 app.use(compression());
 app.use(morgan('combined'));
 
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const localNetworkPattern = /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/;
+    if (allowedOrigins.includes(origin) || localNetworkPattern.test(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS policy blocked origin: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -58,6 +69,104 @@ let reactions = [];
 let comments = [];
 let friendships = [];
 let notifications = [];
+
+// Initialize demo posts with correct authorId
+function initializeDemoPosts() {
+  if (posts.length === 0) {
+    const colors = [
+      'from-pink-200 to-pink-300',
+      'from-blue-200 to-blue-300',
+      'from-green-200 to-green-300',
+      'from-yellow-200 to-yellow-300',
+      'from-purple-200 to-purple-300',
+      'from-indigo-200 to-indigo-300',
+      'from-red-200 to-red-300',
+      'from-teal-200 to-teal-300',
+      'from-orange-200 to-orange-300',
+      'from-rose-200 to-rose-300',
+      'from-emerald-200 to-emerald-300',
+      'from-cyan-200 to-cyan-300'
+    ];
+    
+    posts = [
+      {
+        id: 'demo-1',
+        content: 'Grateful for my family who always supports me through thick and thin. Their love gives me strength every day.',
+        category: 'family',
+        isAnonymous: false,
+        isPrivate: false,
+        moodTags: ['thankful', 'blessed'],
+        location: 'Mumbai',
+        imageUrl: undefined,
+        author: 'Rahul_Sharma',
+        authorId: 'user1',
+        likes: 5,
+        isLiked: false,
+        color: colors[0],
+        reactions: [],
+        replies: [],
+        timestamp: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+      },
+      {
+        id: 'demo-2',
+        content: 'Today I achieved a major milestone at work! Hard work and persistence really do pay off.',
+        category: 'achievement',
+        isAnonymous: false,
+        isPrivate: false,
+        moodTags: ['excited', 'inspired'],
+        location: 'Delhi',
+        imageUrl: undefined,
+        author: 'Priya_Patel',
+        authorId: 'user2',
+        likes: 8,
+        isLiked: false,
+        color: colors[1],
+        reactions: [],
+        replies: [],
+        timestamp: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+      },
+      {
+        id: 'demo-3',
+        content: 'Spent time in nature today and felt so peaceful. The fresh air and green surroundings really calmed my mind.',
+        category: 'nature',
+        isAnonymous: false,
+        isPrivate: false,
+        moodTags: ['peaceful', 'content'],
+        location: 'Bangalore',
+        imageUrl: undefined,
+        author: 'Amit_Kumar',
+        authorId: 'user3',
+        likes: 3,
+        isLiked: false,
+        color: colors[2],
+        reactions: [],
+        replies: [],
+        timestamp: new Date(Date.now() - 259200000).toISOString() // 3 days ago
+      },
+      {
+        id: 'demo-4',
+        content: 'Thankful for my health and the ability to move freely. Every step, every breath is a gift we should never take for granted.',
+        category: 'health',
+        isAnonymous: false,
+        isPrivate: false,
+        moodTags: ['thankful', 'blessed'],
+        location: 'Chennai',
+        imageUrl: undefined,
+        author: 'Sneha_Reddy',
+        authorId: 'user4',
+        likes: 6,
+        isLiked: false,
+        color: colors[3],
+        reactions: [],
+        replies: [],
+        timestamp: new Date(Date.now() - 345600000).toISOString() // 4 days ago
+      }
+    ];
+  }
+}
+
+// Initialize demo posts
+initializeDemoPosts();
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -119,6 +228,23 @@ app.post('/api/posts', (req, res) => {
       return res.status(400).json({ error: 'Content and category are required' });
     }
     
+    // Generate random color for the post
+    const colors = [
+      'from-pink-200 to-pink-300',
+      'from-blue-200 to-blue-300',
+      'from-green-200 to-green-300',
+      'from-yellow-200 to-yellow-300',
+      'from-purple-200 to-purple-300',
+      'from-indigo-200 to-indigo-300',
+      'from-red-200 to-red-300',
+      'from-teal-200 to-teal-300',
+      'from-orange-200 to-orange-300',
+      'from-rose-200 to-rose-300',
+      'from-emerald-200 to-emerald-300',
+      'from-cyan-200 to-cyan-300'
+    ];
+    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
     const newPost = {
       id: Date.now().toString(),
       content,
@@ -129,10 +255,10 @@ app.post('/api/posts', (req, res) => {
       location,
       imageUrl,
       author: isAnonymous ? 'Anonymous' : 'User',
-      authorId: isAnonymous ? null : 'user1',
+      authorId: 'current-user', // Always include authorId for tracking
       likes: 0,
       isLiked: false,
-      color: 'from-orange-200 to-yellow-200',
+      color: randomColor,
       reactions: [],
       replies: [],
       timestamp: new Date().toISOString()

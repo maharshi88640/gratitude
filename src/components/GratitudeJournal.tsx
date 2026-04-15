@@ -1,15 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Book, Calendar, Heart, Star, Lightbulb, Target, Award, ChevronRight, X, Save, Sparkles } from 'lucide-react';
-
-interface JournalEntry {
-  id: string;
-  date: string;
-  content: string;
-  prompt: string;
-  mood: string;
-  tags: string[];
-  reflections: string[];
-}
+import { loadJournalEntries, addJournalEntry, JournalEntry } from '../utils/storage';
 
 interface GratitudeJournalProps {
   onClose: () => void;
@@ -17,7 +8,7 @@ interface GratitudeJournalProps {
 }
 
 const GratitudeJournal: React.FC<GratitudeJournalProps> = ({ onClose, onSave }) => {
-  const [activeTab, setActiveTab] = useState<'write' | 'prompts' | 'challenges' | 'insights'>('write');
+  const [activeTab, setActiveTab] = useState<'write' | 'prompts' | 'challenges' | 'entries' | 'insights'>('write');
   const [currentEntry, setCurrentEntry] = useState({
     content: '',
     mood: '',
@@ -26,6 +17,12 @@ const GratitudeJournal: React.FC<GratitudeJournalProps> = ({ onClose, onSave }) 
   });
   const [selectedPrompt, setSelectedPrompt] = useState('');
   const [savedEntries, setSavedEntries] = useState<JournalEntry[]>([]);
+
+  // Load journal entries on component mount
+  useEffect(() => {
+    const entries = loadJournalEntries();
+    setSavedEntries(entries);
+  }, []);
 
   const dailyPrompts = [
     "What aspect of Indian culture made you feel grateful today?",
@@ -132,6 +129,8 @@ const GratitudeJournal: React.FC<GratitudeJournalProps> = ({ onClose, onSave }) 
       reflections: currentEntry.reflections,
     };
 
+    // Save to storage
+    addJournalEntry(entry);
     setSavedEntries([entry, ...savedEntries]);
     onSave?.(entry);
     
@@ -198,6 +197,7 @@ const GratitudeJournal: React.FC<GratitudeJournalProps> = ({ onClose, onSave }) 
             { id: 'write', label: 'Write', icon: Book },
             { id: 'prompts', label: 'Prompts', icon: Lightbulb },
             { id: 'challenges', label: 'Challenges', icon: Target },
+            { id: 'entries', label: 'Entries', icon: Calendar },
             { id: 'insights', label: 'Insights', icon: Star },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -421,6 +421,74 @@ const GratitudeJournal: React.FC<GratitudeJournalProps> = ({ onClose, onSave }) 
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {activeTab === 'entries' && (
+            <div className="space-y-6">
+              <div className="text-center">
+                <Calendar className="w-12 h-12 text-blue-500 mx-auto mb-3" />
+                <h3 className="text-lg font-semibold text-gray-900">My Journal Entries</h3>
+                <p className="text-gray-600 text-sm mt-1">Review your gratitude journey</p>
+              </div>
+
+              {savedEntries.length === 0 ? (
+                <div className="text-center py-8">
+                  <Book className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h4 className="text-lg font-semibold text-gray-900 mb-2">No entries yet</h4>
+                  <p className="text-gray-600">Start writing your first gratitude entry to see it here.</p>
+                </div>
+              ) : (
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {savedEntries.map((entry) => (
+                    <div key={entry.id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="text-sm text-gray-500">
+                          {new Date(entry.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                        {entry.mood && (
+                          <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full">
+                            {entry.mood}
+                          </span>
+                        )}
+                      </div>
+                      
+                      {entry.prompt && (
+                        <div className="mb-2">
+                          <p className="text-sm text-purple-600 italic">
+                            Prompt: {entry.prompt}
+                          </p>
+                        </div>
+                      )}
+                      
+                      <p className="text-gray-800 leading-relaxed mb-3">
+                        {entry.content}
+                      </p>
+                      
+                      {(entry.tags.length > 0 || entry.reflections.length > 0) && (
+                        <div className="flex flex-wrap gap-2">
+                          {entry.tags.map((tag, index) => (
+                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded">
+                              #{tag}
+                            </span>
+                          ))}
+                          {entry.reflections.length > 0 && (
+                            <span className="px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
+                              {entry.reflections.length} reflection{entry.reflections.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

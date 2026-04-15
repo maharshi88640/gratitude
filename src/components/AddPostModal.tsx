@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Send, Sparkles, Camera, MapPin, Eye, EyeOff, Users } from 'lucide-react';
+import { X, Send, Sparkles, Camera, MapPin, Eye, Users } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { PostCategory, MoodTag } from '../types';
 import { categoryConfigs, moodTagConfigs } from '../utils/categories';
@@ -67,7 +67,7 @@ const AddPostModal: React.FC<AddPostModalProps> = ({ isOpen, onClose, onSubmit }
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="relative inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
         <div 
           className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"

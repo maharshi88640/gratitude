@@ -61,6 +61,12 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     color: 'text-red-500',
     bgColor: 'bg-red-50'
   },
+  daily: {
+    name: 'Daily',
+    icon: 'Sun',
+    color: 'text-yellow-500',
+    bgColor: 'bg-yellow-50'
+  },
   general: {
     name: 'General',
     icon: 'Sparkles',
